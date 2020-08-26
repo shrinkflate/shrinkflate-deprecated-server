@@ -1,20 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"github.com/aerogo/aero"
 	"github.com/h2non/bimg"
 	"runtime"
 )
 
 func main() {
-	runtime.GOMAXPROCS(2)
+	runtime.GOMAXPROCS(1)
 	app := aero.New()
 
 	configure(app).Run()
 }
 
+var n = 0
+
 func configure(app *aero.Application) *aero.Application {
-	buffer, err := bimg.Read("images/image_1.jpg")
+	buffer, err := bimg.Read("images/image_2.jpg")
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +34,8 @@ func configure(app *aero.Application) *aero.Application {
 			panic(err)
 		}
 
-		err = bimg.Write("images/updated.jpg", newImg)
+		err = bimg.Write(fmt.Sprintf("%s%d%s", "images/updated_", n, ".jpg"), newImg)
+		n += 1
 		if err != nil {
 			panic(err)
 		}
