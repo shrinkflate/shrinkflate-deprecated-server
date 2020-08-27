@@ -12,9 +12,10 @@ import (
 )
 
 type ImageData struct {
-	_id      string `bson:"_id"`
-	path     string `bson:"path"`
-	callback string `bson:"callback"`
+	Id       string `bson:"_id"`
+	Path     string `bson:"path"`
+	Callback string `bson:"callback"`
+	Time     int64  `bson:"time"`
 }
 
 type shrinkflateDb struct {
@@ -25,10 +26,10 @@ type shrinkflateDb struct {
 	database *mongo.Database
 }
 
-func (db shrinkflateDb) New() (shrinkflateDb, context.Context, context.CancelFunc, error) {
+func (db shrinkflateDb) New() (*shrinkflateDb, context.Context, context.CancelFunc, error) {
 	conn, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", db.host, db.port)))
 	if err != nil {
-		return shrinkflateDb{}, nil, nil, err
+		return &shrinkflateDb{}, nil, nil, err
 	}
 
 	db.conn = conn
@@ -40,16 +41,16 @@ func (db shrinkflateDb) New() (shrinkflateDb, context.Context, context.CancelFun
 	// connect the database
 	err = db.conn.Connect(ctx)
 	if err != nil {
-		return shrinkflateDb{}, nil, nil, err
+		return &shrinkflateDb{}, nil, nil, err
 	}
 
 	// make sure we're connected
 	err = db.conn.Ping(ctx, readpref.Primary())
 	if err != nil {
-		return shrinkflateDb{}, nil, nil, err
+		return &shrinkflateDb{}, nil, nil, err
 	}
 
-	return db, ctx, cancel, err
+	return &db, ctx, cancel, err
 }
 
 func (db shrinkflateDb) StoreImage(path string, callback string) (string, error) {

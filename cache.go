@@ -14,7 +14,7 @@ type shrinkflateCache struct {
 	password string
 }
 
-func (cache shrinkflateCache) New() (shrinkflateCache, error) {
+func (cache shrinkflateCache) New() (*shrinkflateCache, error) {
 	cache.rdb = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cache.host, cache.port),
 		Password: cache.password,
@@ -27,10 +27,10 @@ func (cache shrinkflateCache) New() (shrinkflateCache, error) {
 	_, err := cache.rdb.Ping(ctx).Result()
 
 	if err != nil {
-		return cache, err
+		return &cache, err
 	}
 
-	return cache, nil
+	return &cache, nil
 }
 
 func (cache shrinkflateCache) Remember(key, value string, expiresInSeconds int64) (string, error) {

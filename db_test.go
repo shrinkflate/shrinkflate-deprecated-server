@@ -7,7 +7,7 @@ import (
 )
 
 func TestShrinkflateDb_New(t *testing.T) {
-	// create the db instance
+	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
 		host: "localhost",
 		port: 27017,
@@ -23,7 +23,7 @@ func TestShrinkflateDb_New(t *testing.T) {
 }
 
 func TestShrinkflateDb_StoreImage(t *testing.T) {
-	// create the db instance
+	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
 		host: "localhost",
 		port: 27017,
@@ -42,7 +42,7 @@ func TestShrinkflateDb_StoreImage(t *testing.T) {
 	var id string
 
 	{
-		id, err = db.StoreImage("/some/path", "https://helloworld.com/")
+		id, err = db.StoreImage("/some/Path", "https://helloworld.com/")
 		require.NoError(t, err)
 		require.NotEqual(t, "", id)
 	}
@@ -50,7 +50,7 @@ func TestShrinkflateDb_StoreImage(t *testing.T) {
 	{
 		image, err := db.FindImage(id)
 		require.NoError(t, err)
-		require.NotNil(t, image._id)
+		require.NotNil(t, image.Id)
 	}
 
 	err = db.database.Drop(context.Background())

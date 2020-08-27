@@ -5,33 +5,38 @@ import (
 	"runtime"
 )
 
-var db shrinkflateDb
-var cache shrinkflateCache
+var DB *shrinkflateDb
+var Cache *shrinkflateCache
 
 func main() {
 	runtime.GOMAXPROCS(1)
 
-	// create the db instance
+	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
 		host: "localhost",
 		port: 27017,
 		name: "shrinkflate",
 	}.New()
+
+	DB = db
+
 	if err != nil {
 		panic(err)
 	}
 	defer cancel()
 	defer func() {
-		if err = db.conn.Disconnect(ctx); err != nil {
+		if err = DB.conn.Disconnect(ctx); err != nil {
 			panic(err)
 		}
 	}()
 
-	cache, err = shrinkflateCache{
+	cache, err := shrinkflateCache{
 		host:     "localhost",
 		port:     6379,
 		password: "k",
 	}.New()
+
+	Cache = cache
 
 	err = PrepareQueueHandler()
 	if err != nil {
@@ -49,7 +54,8 @@ func configure(app *aero.Application) *aero.Application {
 	controller := shrinkflateController{}
 
 	app.Get("/", controller.Welcome)
-	app.Post("/compress", controller.Compress)
+	app.Post("/compress/", controller.Compress)
+	app.Get("/download/:id", controller.Download)
 
 	return app
 }

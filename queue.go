@@ -14,10 +14,10 @@ func PrepareQueueHandler() error {
 	QueueFactory := redisq.NewFactory()
 
 	MainQueue = QueueFactory.RegisterQueue(&taskq.QueueOptions{
-		Name:        "api-worker",
-		Redis:       cache.rdb,
-		MinNumWorker: 1,
-		MaxNumWorker: 5,
+		Name:          "api-worker",
+		Redis:         Cache.rdb,
+		MinNumWorker:  1,
+		MaxNumWorker:  5,
 		MaxNumFetcher: 5,
 	})
 

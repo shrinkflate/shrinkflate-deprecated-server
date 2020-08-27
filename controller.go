@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/aerogo/aero"
-	"github.com/h2non/bimg"
 	"io"
-	"strings"
+	"os"
+	"path/filepath"
 )
 
 type shrinkflateController struct {
@@ -31,39 +30,35 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 	}()
 
 	// copy the file into buffer
-	name := strings.Split(header.Filename, ".")
-	fmt.Println("Filename", name)
-
-	var buffer bytes.Buffer
-	s, err := io.Copy(&buffer, file)
+	filename := fmt.Sprintf("images/%s", header.Filename)
+	dst, err := os.Create(filename)
+	_, err = io.Copy(dst, file)
 	if err != nil {
 		return ctx.String(err.Error())
 	}
 
-	// create new image from buffer
-	img := bimg.NewImage(buffer.Bytes())
-	size, err := img.Size()
+	id, err := DB.StoreImage(filename, request.Form.Get("callback"))
 	if err != nil {
 		return ctx.String(err.Error())
 	}
 
-	// resize image
-	newImg, err := img.Resize(size.Width, size.Height)
-	if err != nil {
-		return ctx.String(err.Error())
-	}
+	QueueJob(id)
 
-	// write file
-	fileName := fmt.Sprintf("%s%d%s", "images/updated_", s, ".jpg")
-	err = bimg.Write(fileName, newImg)
-	if err != nil {
-		return ctx.String(err.Error())
-	}
-
-	return ctx.String(fileName)
+	return ctx.String(id)
 }
 
 func (controller shrinkflateController) Welcome(ctx aero.Context) error {
-	QueueJob("New ID")
 	return ctx.String("Welcome")
+}
+
+func (controller shrinkflateController) Download(ctx aero.Context) error {
+	id := ctx.Get("id")
+
+	imageData, err := DB.FindImage(id)
+	if err != nil {
+		ctx.Response().SetHeader("Status", "404 Not Found")
+		return ctx.String("We could not find the image you're looking for")
+	}
+
+	return ctx.File(fmt.Sprintf("compressed/%s.%s", imageData.Id, filepath.Ext(imageData.Path)))
 }

@@ -36,7 +36,7 @@ func TestShrinkflateCache_Forget(t *testing.T) {
 	require.Error(t, err)
 }
 
-func getCache() (shrinkflateCache, error) {
+func getCache() (*shrinkflateCache, error) {
 	return shrinkflateCache{
 		host:     "localhost",
 		port:     6379,
