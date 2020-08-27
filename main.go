@@ -11,8 +11,6 @@ var DB *shrinkflateDb
 var Cache *shrinkflateCache
 
 func main() {
-	runtime.GOMAXPROCS(1)
-
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
