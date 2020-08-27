@@ -42,7 +42,7 @@ func (image Image) Compress() {
 	}
 
 	// write file
-	fileName := fmt.Sprintf("compressed/%s.%s", image.id, filepath.Ext(image.imageData.Path))
+	fileName := fmt.Sprintf("compressed/%s%s", image.id, filepath.Ext(image.imageData.Path))
 	err = bimg.Write(fileName, newImg)
 	if err != nil {
 		log.Println("Failed to write file")

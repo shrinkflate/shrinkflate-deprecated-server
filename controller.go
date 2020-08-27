@@ -60,5 +60,5 @@ func (controller shrinkflateController) Download(ctx aero.Context) error {
 		return ctx.String("We could not find the image you're looking for")
 	}
 
-	return ctx.File(fmt.Sprintf("compressed/%s.%s", imageData.Id, filepath.Ext(imageData.Path)))
+	return ctx.File(fmt.Sprintf("compressed/%s%s", imageData.Id, filepath.Ext(imageData.Path)))
 }
