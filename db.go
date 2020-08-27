@@ -21,13 +21,13 @@ type ImageData struct {
 type shrinkflateDb struct {
 	conn     *mongo.Client
 	host     string
-	port     int
+	port     string
 	name     string
 	database *mongo.Database
 }
 
 func (db shrinkflateDb) New() (*shrinkflateDb, context.Context, context.CancelFunc, error) {
-	conn, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", db.host, db.port)))
+	conn, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s", db.host, db.port)))
 	if err != nil {
 		return &shrinkflateDb{}, nil, nil, err
 	}

@@ -39,7 +39,7 @@ func TestShrinkflateCache_Forget(t *testing.T) {
 func getCache() (*shrinkflateCache, error) {
 	return shrinkflateCache{
 		host:     "localhost",
-		port:     6379,
+		port:     "6379",
 		password: "k",
 	}.New()
 }

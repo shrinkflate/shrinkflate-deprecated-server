@@ -10,7 +10,7 @@ func TestShrinkflateDb_New(t *testing.T) {
 	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
 		host: "localhost",
-		port: 27017,
+		port: "27017",
 		name: "shrinkflate_test",
 	}.New()
 
@@ -26,7 +26,7 @@ func TestShrinkflateDb_StoreImage(t *testing.T) {
 	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
 		host: "localhost",
-		port: 27017,
+		port: "27017",
 		name: "shrinkflate_test",
 	}.New()
 	require.NoError(t, err)

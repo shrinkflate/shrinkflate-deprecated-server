@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/aerogo/aero"
+	"github.com/joho/godotenv"
+	"os"
 	"runtime"
 )
 
@@ -11,11 +13,16 @@ var Cache *shrinkflateCache
 func main() {
 	runtime.GOMAXPROCS(1)
 
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	// create the DB instance
 	db, ctx, cancel, err := shrinkflateDb{
-		host: "localhost",
-		port: 27017,
-		name: "shrinkflate",
+		host: os.Getenv("MONGO_HOST"),
+		port: os.Getenv("MONGO_PORT"),
+		name: os.Getenv("MONGO_DB"),
 	}.New()
 
 	DB = db
@@ -31,9 +38,9 @@ func main() {
 	}()
 
 	cache, err := shrinkflateCache{
-		host:     "localhost",
-		port:     6379,
-		password: "k",
+		host:     os.Getenv("REDIS_HOST"),
+		port:     os.Getenv("REDIS_PORT"),
+		password: os.Getenv("REDIS_PASS"),
 	}.New()
 
 	Cache = cache

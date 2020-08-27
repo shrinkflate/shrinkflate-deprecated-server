@@ -10,13 +10,13 @@ import (
 type shrinkflateCache struct {
 	rdb      *redis.Client
 	host     string
-	port     int
+	port     string
 	password string
 }
 
 func (cache shrinkflateCache) New() (*shrinkflateCache, error) {
 	cache.rdb = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", cache.host, cache.port),
+		Addr:     fmt.Sprintf("%s:%s", cache.host, cache.port),
 		Password: cache.password,
 		DB:       0,
 	})
