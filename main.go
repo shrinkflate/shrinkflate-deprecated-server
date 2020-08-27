@@ -4,7 +4,6 @@ import (
 	"github.com/aerogo/aero"
 	"github.com/joho/godotenv"
 	"os"
-	"runtime"
 )
 
 var DB *shrinkflateDb
