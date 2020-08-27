@@ -54,7 +54,7 @@ func configure(app *aero.Application) *aero.Application {
 	controller := shrinkflateController{}
 
 	app.Get("/", controller.Welcome)
-	app.Post("/compress/", controller.Compress)
+	app.Post("/compress", controller.Compress)
 	app.Get("/download/:id", controller.Download)
 
 	return app

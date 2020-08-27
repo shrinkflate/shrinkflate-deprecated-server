@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Shrinkflate</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        .has-border {
+            border: 1px solid #222;
+            border-radius: 3px;
+            min-height: 100px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h1 style="text-align: center">
+                Shrinkflate <small id="status"></small>
+            </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="row">
+                <div class="col-md-6 p-4">
+                    <div class="row">
+                        <div class="col-md-12 d-flex justify-content-between">
+                            <h3>Your image: <span id="size-before">0KB</span></h3>
+                            <label for="upload" class="btn btn-primary">
+                                <input type="file" style="display: none;" id="upload">
+                                Upload
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 has-border">
+                            <img id="source" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 p-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Compressed image: <span id="size-after">0KB</span></h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 has-border">
+                            <img id="dest" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  $(function() {
+    var fileId;
+    var status = $('#status');
+    $('#upload').on('change', function(e) {
+      var input = e.currentTarget;
+      if (input.files && input.files[0]) {
+        var file = input.files[0];
+        if (!file.type.match(/^image\//g)) {
+          alert('Image files only');
+          return;
+        }
+
+        readURL(file);
+        upload(file);
+
+        status.html('uploading...');
+      }
+    });
+
+    function readURL(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        $('#source').attr('src', e.target.result);
+      };
+      $('#size-before').html(bytesToSize(file.size));
+      reader.readAsDataURL(file);
+    }
+
+    function upload(file) {
+      var formData = new FormData();
+      formData.append('image', file);
+      formData.append('callback', 'nowhere');
+
+      axios.post('compress', formData).then(function(response) {
+        fileId = response.data;
+        status.html('waiting...');
+        fireTimer();
+      }).catch(function(error) {
+        alert('error occurred. check console log');
+        console.log(error);
+      });
+    }
+
+    function bytesToSize(bytes) {
+      var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      if (bytes === 0) return '0 Byte';
+      var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+      return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
+    function fireTimer() {
+      axios.get('download/' + fileId + '?q=' + (new Date).getTime()).then(function(response) {
+        $('#dest').attr('src', '/download/' + fileId).on('load', function(e) {
+          var size = performance.getEntriesByName(e.currentTarget.src)[0].transferSize;
+          $('#size-after').html(bytesToSize(size));
+          status.html('Done');
+        });
+      }).catch(function(error) {
+        if (error.response.status === 404) {
+          return setTimeout(fireTimer, 3000);
+        }
+        alert('error occurred. check console.log');
+        console.log(error);
+        status.html('Done');
+      });
+    }
+  });
+</script>
+</body>
+</html>

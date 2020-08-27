@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aerogo/aero"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -48,7 +49,12 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 }
 
 func (controller shrinkflateController) Welcome(ctx aero.Context) error {
-	return ctx.String("Welcome")
+	index, err := ioutil.ReadFile("public/index.html")
+	if err != nil {
+		return ctx.String("Could not prepare response")
+	}
+
+	return ctx.HTML(string(index))
 }
 
 func (controller shrinkflateController) Download(ctx aero.Context) error {
