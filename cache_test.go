@@ -6,20 +6,20 @@ import (
 )
 
 func TestShrinkflateCache_New(t *testing.T) {
-	cache, err := cache()
+	cache, err := getCache()
 
 	require.NoError(t, err)
 	require.NotNil(t, cache.rdb)
 }
 
 func TestShrinkflateCache_Remember(t *testing.T) {
-	cache, _ := cache()
+	cache, _ := getCache()
 	_, err := cache.Remember("hello", "world", 0)
 	require.NoError(t, err)
 }
 
 func TestShrinkflateCache_Get(t *testing.T) {
-	cache, _ := cache()
+	cache, _ := getCache()
 
 	val, err := cache.Get("hello")
 	require.NoError(t, err)
@@ -27,7 +27,7 @@ func TestShrinkflateCache_Get(t *testing.T) {
 }
 
 func TestShrinkflateCache_Forget(t *testing.T) {
-	cache, _ := cache()
+	cache, _ := getCache()
 
 	_, err := cache.Forget("hello")
 	require.NoError(t, err)
@@ -36,7 +36,7 @@ func TestShrinkflateCache_Forget(t *testing.T) {
 	require.Error(t, err)
 }
 
-func cache() (shrinkflateCache, error) {
+func getCache() (shrinkflateCache, error) {
 	return shrinkflateCache{
 		host:     "localhost",
 		port:     6379,

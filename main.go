@@ -6,6 +6,7 @@ import (
 )
 
 var db shrinkflateDb
+var cache shrinkflateCache
 
 func main() {
 	runtime.GOMAXPROCS(1)
@@ -25,6 +26,17 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	cache, err = shrinkflateCache{
+		host:     "localhost",
+		port:     6379,
+		password: "k",
+	}.New()
+
+	err = PrepareQueueHandler()
+	if err != nil {
+		panic(err)
+	}
 
 	// initiate the app
 	app := aero.New()

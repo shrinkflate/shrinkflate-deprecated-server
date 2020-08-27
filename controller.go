@@ -64,5 +64,6 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 }
 
 func (controller shrinkflateController) Welcome(ctx aero.Context) error {
+	QueueJob("New ID")
 	return ctx.String("Welcome")
 }
