@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aerogo/aero"
 	"github.com/joho/godotenv"
+	"log"
 	"os"
 )
 
@@ -12,6 +13,7 @@ var Cache *shrinkflateCache
 func main() {
 	err := godotenv.Load()
 	if err != nil {
+		log.Println("Could not load .env")
 		panic(err)
 	}
 
@@ -30,6 +32,7 @@ func main() {
 	defer cancel()
 	defer func() {
 		if err = DB.conn.Disconnect(ctx); err != nil {
+			log.Println("Could not prepare database")
 			panic(err)
 		}
 	}()
@@ -44,6 +47,7 @@ func main() {
 
 	err = PrepareQueueHandler()
 	if err != nil {
+		log.Println("Could not prepare queue")
 		panic(err)
 	}
 
@@ -72,6 +76,7 @@ func init() {
 	if os.IsNotExist(err) {
 		err = os.Mkdir("compressed", 0777)
 		if err != nil {
+			log.Println("Could not create directory")
 			panic(err)
 		}
 	}

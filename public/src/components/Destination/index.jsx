@@ -18,7 +18,7 @@ class Destination extends Component {
   };
 
   uploaded = e => {
-    this.setState({file: this.props.file, fileId: e.fileId, opts: e.opts});
+    this.setState({file: this.props.file, fileId: e.fileId, opts: e.opts, url: null});
     this.props.setStatus('Uploaded');
     this.lookForFinish();
   };

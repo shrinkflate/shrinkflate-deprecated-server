@@ -61,6 +61,6 @@ func QueueJob(id, compressor string, quality, progressive int) {
 
 	err := MainQueue.Add(msg)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
