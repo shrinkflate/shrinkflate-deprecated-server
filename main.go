@@ -66,3 +66,13 @@ func configure(app *aero.Application) *aero.Application {
 
 	return app
 }
+
+func init() {
+	_, err := os.Stat("compressed")
+	if os.IsNotExist(err) {
+		err = os.Mkdir("compressed", 0777)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
