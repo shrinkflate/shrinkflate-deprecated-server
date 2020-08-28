@@ -40,7 +40,11 @@ class Uploader extends Component {
     form.append('progressive', this.state.progressive);
     form.append('compressor', this.state.compressor);
 
-    axios.post(`http://localhost:4000/compress`, form).then(response => {
+    const prefix = window.location.href.includes('localhost') ?
+        'http://localhost:4000' :
+        '';
+
+    axios.post(`${prefix}/compress`, form).then(response => {
       this.props.uploaded({
         fileId: response.data,
         opts: {

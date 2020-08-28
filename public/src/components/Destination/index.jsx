@@ -25,7 +25,11 @@ class Destination extends Component {
 
   lookForFinish = () => {
     this.props.setStatus('waiting for finish...');
-    const url = `http://localhost:4000/download/${this.state.fileId}`;
+
+    const prefix = window.location.href.includes('localhost') ?
+        'http://localhost:4000' :
+        '';
+    const url = `${prefix}/download/${this.state.fileId}`;
     axios.get(url + '?q=' + (new Date()).getTime()).then(response => {
       const size = response.headers['content-length'];
       this.setState({url, size});
