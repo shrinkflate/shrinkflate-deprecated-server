@@ -23,8 +23,28 @@ func PrepareQueueHandler() error {
 
 	CompressTask = taskq.RegisterTask(&taskq.TaskOptions{
 		Name: "compress",
-		Handler: func(id string) error {
-			Image{id: id}.Compress()
+		Handler: func(id, compressor string, quality, progressive int) error {
+
+			imageOpts := ImageOpts{
+				id:          id,
+				compressor:  compressor,
+				quality:     quality,
+				progressive: progressive,
+			}
+
+			var c Compressor
+			if imageOpts.compressor == "libvips" {
+				c = LibVipsCompressor{}
+			} else {
+				c = LilliputCompressor{}
+			}
+
+			Image{
+				id:          imageOpts.id,
+				compressor:  c,
+				Quality:     imageOpts.quality,
+				Progressive: imageOpts.progressive,
+			}.Compress()
 			return nil
 		},
 	})
@@ -34,10 +54,11 @@ func PrepareQueueHandler() error {
 	return consumer.Start(context.Background())
 }
 
-func QueueJob(id string) {
+func QueueJob(id, compressor string, quality, progressive int) {
 	ctx := context.Background()
-	msg := CompressTask.WithArgs(ctx, id)
+	msg := CompressTask.WithArgs(ctx, id, compressor, quality, progressive)
 	msg.Delay = 0
+
 	err := MainQueue.Add(msg)
 	if err != nil {
 		log.Fatal(err)

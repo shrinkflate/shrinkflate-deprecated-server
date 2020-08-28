@@ -10,6 +10,7 @@ class Destination extends Component {
     size: 0,
     url: null,
     fileId: null,
+    opts: {},
   };
 
   reconfigure = () => {
@@ -17,7 +18,7 @@ class Destination extends Component {
   };
 
   uploaded = e => {
-    this.setState({file: this.props.file, fileId: e.fileId});
+    this.setState({file: this.props.file, fileId: e.fileId, opts: e.opts});
     this.props.setStatus('Uploaded');
     this.lookForFinish();
   };
@@ -60,6 +61,7 @@ class Destination extends Component {
               ? <Uploader className="mt-5" uploaded={this.uploaded}
                           setStatus={this.props.setStatus}
                           file={this.props.file}
+                          opts={this.state.opts}
               />
               : null}
         </div>

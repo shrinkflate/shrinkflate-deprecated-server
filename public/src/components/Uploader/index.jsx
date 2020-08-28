@@ -10,6 +10,14 @@ class Uploader extends Component {
     uploading: false,
   };
 
+  componentDidMount() {
+    this.setState({
+      compressor: this.props.opts.compressor || 'libvips',
+      quality: this.props.opts.quality || 85,
+      progressive: this.props.opts.progressive || false,
+    });
+  }
+
   setCompressor = e => {
     this.setState({compressor: e.currentTarget.value});
   };
@@ -35,6 +43,11 @@ class Uploader extends Component {
     axios.post(`http://localhost:4000/compress`, form).then(response => {
       this.props.uploaded({
         fileId: response.data,
+        opts: {
+          compressor: this.state.compressor,
+          quality: this.state.quality,
+          progressive: this.state.progressive,
+        },
       });
     }).catch(error => {
       this.setState({uploading: false});
