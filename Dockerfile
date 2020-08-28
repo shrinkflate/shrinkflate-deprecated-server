@@ -52,6 +52,7 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
+COPY config.prod.json config.json
 COPY .env ./build/.env
 
 RUN go build -o ./build/shrinkflate .

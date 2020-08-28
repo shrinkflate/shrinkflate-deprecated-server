@@ -35,6 +35,9 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 	// copy the file into buffer
 	filename := fmt.Sprintf("images/%s", header.Filename)
 	dst, err := os.Create(filename)
+	defer func() {
+		_ = dst.Close()
+	}()
 	_, err = io.Copy(dst, file)
 	if err != nil {
 		return ctx.String(err.Error())
