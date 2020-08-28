@@ -1,19 +1,9 @@
 {
   "push": [
-    "/frontend/asset-manifest.json",
-    "/frontend/compress.png",
-    "/frontend/manifest.json",
-    "/frontend/robots.txt",
-    "/frontend/service-worker.js",
-    "/frontend/precache-manifest.db17c619c9085fc86749775b49d08c55.js",
-    "/frontend/static/js/2.68abe4e3.chunk.js",
-    "/frontend/static/js/main.b48458e0.chunk.js",
-    "/frontend/static/js/runtime-main.781a2b66.js",
-    "/frontend/static/css/2.11829350.chunk.css"
   ],
   "gzip": true,
   "ports": {
-    "http": 4000,
-    "https": 4001
+    "http": 80,
+    "https": 443
   }
 }
