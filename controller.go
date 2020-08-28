@@ -81,8 +81,7 @@ func (controller shrinkflateController) Download(w http.ResponseWriter, r *http.
 
 	imageData, err := DB.FindImage(vars["id"])
 	if err != nil {
-		w.Header().Add("status", "404 not found")
-		sendResponse([]byte("Not found"), w)
+		http.NotFoundHandler().ServeHTTP(w, r)
 		return
 	}
 
@@ -93,8 +92,7 @@ func (controller shrinkflateController) Download(w http.ResponseWriter, r *http.
 
 	fileContent, err := ioutil.ReadFile("compressed/" + imageData.Id + ext)
 	if err != nil {
-		w.Header().Add("status", "404 not found")
-		sendResponse([]byte("Not found"), w)
+		http.NotFoundHandler().ServeHTTP(w, r)
 		return
 	}
 
