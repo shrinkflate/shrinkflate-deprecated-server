@@ -1,5 +1,6 @@
 package main
 
+import "C"
 import (
 	"fmt"
 	"github.com/h2non/bimg"
@@ -12,6 +13,9 @@ type LibVipsCompressor struct {
 }
 
 func (compressor LibVipsCompressor) Compress(image* Image) {
+
+	bimg.VipsCacheSetMax(0)
+	bimg.VipsCacheSetMaxMem(0)
 
 	err := image.Load()
 	if err != nil {
@@ -27,6 +31,7 @@ func (compressor LibVipsCompressor) Compress(image* Image) {
 
 	// create new image from buffer
 	img := bimg.NewImage(buffer)
+	buffer = nil
 	size, err := img.Size()
 	if err != nil {
 		log.Println("Failed to create new image from buffer", image)

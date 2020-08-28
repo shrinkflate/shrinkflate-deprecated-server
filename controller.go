@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/aerogo/aero"
+	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
+	"log"
+	"mime"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -13,20 +16,15 @@ import (
 type shrinkflateController struct {
 }
 
-func (controller shrinkflateController) Compress(ctx aero.Context) error {
-	allowCors(ctx)
-	request := ctx.Request().Internal()
-
-	// parse the request
-	err := request.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return ctx.String(err.Error())
-	}
+func (controller shrinkflateController) Compress(w http.ResponseWriter, r *http.Request) {
+	allowCors(w)
 
 	// get the file handle
-	file, header, err := request.FormFile("image")
+	file, header, err := r.FormFile("image")
 	if err != nil {
-		return ctx.String(err.Error())
+		w.Header().Add("status", "412")
+		sendResponse([]byte(err.Error()), w)
+		return
 	}
 	defer func() {
 		_ = file.Close()
@@ -40,18 +38,22 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 	}()
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		return ctx.String(err.Error())
+		w.Header().Add("status", "500")
+		sendResponse([]byte(err.Error()), w)
+		return
 	}
 
-	id, err := DB.StoreImage(filename, request.Form.Get("callback"))
+	id, err := DB.StoreImage(filename, r.Form.Get("callback"))
 	if err != nil {
-		return ctx.String(err.Error())
+		w.Header().Add("status", "412")
+		sendResponse([]byte(err.Error()), w)
+		return
 	}
 
-	compressor := request.Form.Get("compressor")
+	compressor := r.Form.Get("compressor")
 
-	quality, _ := strconv.ParseInt(request.Form.Get("quality"), 10, 64)
-	progressive, _ := strconv.ParseBool(request.Form.Get("progressive"))
+	quality, _ := strconv.ParseInt(r.Form.Get("quality"), 10, 64)
+	progressive, _ := strconv.ParseBool(r.Form.Get("progressive"))
 	progressiveVal := 0
 	if progressive {
 		progressiveVal = 1
@@ -59,83 +61,56 @@ func (controller shrinkflateController) Compress(ctx aero.Context) error {
 
 	QueueJob(id, compressor, int(quality), progressiveVal)
 
-	return ctx.String(id)
+	sendResponse([]byte(id), w)
 }
 
-func (controller shrinkflateController) Welcome(ctx aero.Context) error {
-	allowCors(ctx)
+func (controller shrinkflateController) Welcome(w http.ResponseWriter, _ *http.Request) {
+	allowCors(w)
 
 	fileContent, err := ioutil.ReadFile("public/build/index.html")
 	if err != nil {
-		return ctx.String("Could not prepare response")
+		log.Println("Could not read index file", err)
 	}
 
-	return ctx.HTML(string(fileContent))
+	sendResponse(fileContent, w)
 }
 
-func (controller shrinkflateController) RootFiles(ctx aero.Context) error {
-	file := ctx.Get("file")
+func (controller shrinkflateController) Download(w http.ResponseWriter, r *http.Request) {
+	allowCors(w)
+	vars := mux.Vars(r)
 
-	file = fmt.Sprintf("%s%s", "public/build/", file)
-
-	if !fileExists(file) {
-		ctx.Response().SetHeader("status", "404 Not Found")
-		return ctx.String("Root file not found")
-	}
-
-	return ctx.File(file)
-}
-
-func (controller shrinkflateController) JSFiles(ctx aero.Context) error {
-	file := ctx.Get("file")
-
-	file = fmt.Sprintf("%s%s", "public/build/static/js/", file)
-
-	if !fileExists(file) {
-		ctx.Response().SetHeader("status", "404 Not Found")
-		return ctx.String("JS not found")
-	}
-
-	return ctx.File(file)
-}
-
-func (controller shrinkflateController) CSSFiles(ctx aero.Context) error {
-	file := ctx.Get("file")
-
-	file = fmt.Sprintf("%s%s", "public/build/static/css/", file)
-
-	if !fileExists(file) {
-		ctx.Response().SetHeader("status", "404 Not Found")
-		return ctx.String("CSS not found")
-	}
-
-	return ctx.File(file)
-}
-
-func (controller shrinkflateController) Download(ctx aero.Context) error {
-	allowCors(ctx)
-	id := ctx.Get("id")
-
-	imageData, err := DB.FindImage(id)
+	imageData, err := DB.FindImage(vars["id"])
 	if err != nil {
-		ctx.Response().SetHeader("Status", "404 Not Found")
-		return ctx.String("We could not find the image you're looking for")
+		w.Header().Add("status", "404 not found")
+		sendResponse([]byte("Not found"), w)
+		return
 	}
 
-	return ctx.File(fmt.Sprintf("compressed/%s%s", imageData.Id, filepath.Ext(imageData.Path)))
-}
+	ext := filepath.Ext(imageData.Path)
 
-func allowCors(ctx aero.Context) aero.Context {
-	response := ctx.Response()
-	response.SetHeader("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Description", "File Transfer")
+	w.Header().Set("Content-Disposition", "attachment; filename="+imageData.Id+ext)
 
-	return ctx
-}
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
+	fileContent, err := ioutil.ReadFile("compressed/" + imageData.Id + ext)
+	if err != nil {
+		w.Header().Add("status", "404 not found")
+		sendResponse([]byte("Not found"), w)
+		return
 	}
-	return !info.IsDir()
+
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(fileContent)))
+	w.Header().Set("Content-Type", mime.TypeByExtension(ext))
+
+	sendResponse(fileContent, w)
+}
+
+func allowCors(w http.ResponseWriter) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+}
+
+func sendResponse(text []byte, w http.ResponseWriter) {
+	_, err := w.Write(text)
+	if err != nil {
+		log.Println("Could not send response", err)
+	}
 }

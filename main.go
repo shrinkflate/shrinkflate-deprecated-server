@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/aerogo/aero"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 )
 
@@ -57,24 +59,27 @@ func main() {
 		panic(err)
 	}
 
-	// initiate the app
-	app := aero.New()
+	router := configure()
 
-	configure(app).Run()
+	err = http.ListenAndServe(":4000", router)
+	if err != nil {
+		log.Println("Error starting server")
+	}
 }
 
-func configure(app *aero.Application) *aero.Application {
+func configure() *mux.Router {
 
+	router := mux.NewRouter()
 	controller := shrinkflateController{}
 
-	app.Get("/", controller.Welcome)
-	app.Get("/frontend/static/js/:file", controller.JSFiles)
-	app.Get("/frontend/static/css/:file", controller.CSSFiles)
-	app.Get("/frontend/:file", controller.RootFiles)
-	app.Post("/compress", controller.Compress)
-	app.Get("/download/:id", controller.Download)
+	router.HandleFunc("/", controller.Welcome).Methods("GET")
+	router.HandleFunc("/compress", controller.Compress).Methods("POST")
+	router.HandleFunc("/download/{id}", controller.Download).Methods("GET")
+	router.PathPrefix("/frontend").Handler(http.StripPrefix("/frontend", http.FileServer(http.Dir("public/build"))))
 
-	return app
+	router.PathPrefix("/debug/").Handler(http.DefaultServeMux)
+
+	return router
 }
 
 func init() {
