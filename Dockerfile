@@ -39,6 +39,10 @@ RUN wget https://github.com/libvips/libvips/releases/download/v8.10.0/vips-8.10.
 RUN tar -xzvf vips-8.10.0.tar.gz
 RUN cd vips-8.10.0 && ./configure && make && make install
 
+RUN wget https://github.com/discord/lilliput/blob/master/deps/build-deps-linux.sh
+RUN chmod a+x build-deps-linux.sh
+RUN ./build-deps-linux.sh
+
 WORKDIR $GOPATH/src/github.com/shrinkflate/shrinkflate
 
 COPY go.mod .
