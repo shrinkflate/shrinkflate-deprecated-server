@@ -30,7 +30,7 @@ class Destination extends Component {
       this.setState({url, size});
       this.props.setStatus('done');
     }).catch(error => {
-      if (error.response.status === 404) {
+      if (error.response && error.response.status === 404) {
         setTimeout(this.lookForFinish, 2000);
       } else {
         alert('Error occurred. check console');
