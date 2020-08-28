@@ -42,7 +42,7 @@ RUN cd vips-8.10.0 && ./configure && make && make install
 RUN apt-get install nasm cmake -y
 
 RUN git clone https://github.com/discord/lilliput.git
-RUN cd lilliput && chmod a+x * && ./build-deps-linux.sh
+RUN cd lilliput/deps && chmod a+x * && ./build-deps-linux.sh
 
 WORKDIR $GOPATH/src/github.com/shrinkflate/shrinkflate
 
