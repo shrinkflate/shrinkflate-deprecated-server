@@ -11,6 +11,12 @@ var DB *shrinkflateDb
 var Cache *shrinkflateCache
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Panic recovery", err)
+		}
+	}()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Could not load .env")
