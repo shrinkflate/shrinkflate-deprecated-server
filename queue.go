@@ -9,6 +9,8 @@ import (
 
 var MainQueue taskq.Queue
 var CompressTask *taskq.Task
+var libvipsCompressor = LibVipsCompressor{}
+var lilliputCompressor = LilliputCompressor{}
 
 func PrepareQueueHandler() error {
 	QueueFactory := redisq.NewFactory()
@@ -34,9 +36,9 @@ func PrepareQueueHandler() error {
 
 			var c Compressor
 			if imageOpts.compressor == "libvips" {
-				c = LibVipsCompressor{}
+				c = libvipsCompressor
 			} else {
-				c = LilliputCompressor{}
+				c = lilliputCompressor
 			}
 
 			Image{
