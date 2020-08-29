@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+// get ready to resize image,
+// using 8192x8192 maximum resize buffer size
+var imageOps = lilliput.NewImageOps(8192)
+
 type LilliputCompressor struct {
 }
 
@@ -38,11 +42,6 @@ func (compressor LilliputCompressor) Compress(image *Image) {
 		return
 	}
 
-	// get ready to resize image,
-	// using 8192x8192 maximum resize buffer size
-	ops := lilliput.NewImageOps(8192)
-	defer ops.Close()
-
 	// create a buffer to store the output image, 50MB in this case
 	outputImg := make([]byte, 50*1024*1024)
 
@@ -67,7 +66,7 @@ func (compressor LilliputCompressor) Compress(image *Image) {
 	}
 
 	// resize and transcode image
-	outputImg, err = ops.Transform(decoder, opts, outputImg)
+	outputImg, err = imageOps.Transform(decoder, opts, outputImg)
 	if err != nil {
 		fmt.Printf("error transforming image, %s\n", err)
 		return
