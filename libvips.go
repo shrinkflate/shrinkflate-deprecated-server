@@ -34,6 +34,7 @@ func (compressor LibVipsCompressor) Compress(image* Image) {
 	size, err := img.Size()
 	if err != nil {
 		log.Println("Failed to create new image from buffer", image)
+		bimg.VipsCacheDropAll()
 		bimg.VipsDebugInfo()
 		return
 	}
