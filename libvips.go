@@ -31,10 +31,10 @@ func (compressor LibVipsCompressor) Compress(image* Image) {
 
 	// create new image from buffer
 	img := bimg.NewImage(buffer)
-	buffer = nil
 	size, err := img.Size()
 	if err != nil {
 		log.Println("Failed to create new image from buffer", image)
+		bimg.VipsDebugInfo()
 		return
 	}
 
