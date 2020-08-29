@@ -14,8 +14,8 @@ type LibVipsCompressor struct {
 
 func (compressor LibVipsCompressor) Compress(image* Image) {
 
-	bimg.VipsCacheSetMax(0)
-	bimg.VipsCacheSetMaxMem(0)
+	//bimg.VipsCacheSetMax(0)
+	//bimg.VipsCacheSetMaxMem(0)
 
 	err := image.Load()
 	if err != nil {
